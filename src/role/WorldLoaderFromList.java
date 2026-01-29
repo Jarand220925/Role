@@ -105,6 +105,7 @@ public class WorldLoaderFromList {
         
         int scaledChunk = chunk * SCALED_SIZE;
         
+        // Unøyaktig
         int currHighX = scaledPX + scaledChunk;
         int currHighY = scaledPY + scaledChunk;
         int currLowX = scaledPX - scaledChunk;
@@ -121,13 +122,17 @@ public class WorldLoaderFromList {
         int prevX = 0;
         int prevY = 0;
         int setXxTo = px * SCALED_SIZE - scaledChunk;
-        int setYyTo = py * SCALED_SIZE - scaledChunk;
-        for(int xx = setXxTo; xx <= scaledChunk + scaledLoadPosX; xx+=SCALED_SIZE) {
-            final int intX = xx;
-            int nextIndex = 0;
+        int setYyTo = py * SCALED_SIZE + scaledChunk;
+        int nextIndexX = 0;
+        for(int xx = setXxTo; xx <= currHighX; xx+=SCALED_SIZE) {
+            
+            int nextIndexY = 0;
+            final int intX = currHighX - nextIndexX * SCALED_SIZE;
+            
             //if (intX == prevX) continue;
-            Optional<GameObject> go = worldHandler.objects.stream().filter(GameObject -> GameObject.getX() == (float) intX).findFirst();
-            go = worldHandler.objects.stream().filter(GameObject -> GameObject.getX() == (float) intX && GameObject.getY() == setYyTo).findFirst();
+            // For hver indeks tellende fra null og oppover, vil y posisjonen endre seg i senkende verdi.
+            Optional<GameObject> go = worldHandler.objects.stream().filter(GameObject -> GameObject.getX() == intX).findFirst();
+            go = worldHandler.objects.stream().filter(GameObject -> GameObject.getX() <= intX && GameObject.getY() <= currHighY).findFirst();
             GameObject landToCheck = null;
 
             //if(xx >= biggestLowX && xx <= smallestHighX && currLowY >= biggestLowY && currLowY <= smallestHighY) continue;
@@ -141,12 +146,12 @@ public class WorldLoaderFromList {
             int indexOfChkObj = worldHandler.objects.indexOf(landToCheck);
             
             
-            for(int yy = setYyTo; yy <= currHighY; yy+=SCALED_SIZE) {
+            for(int yy = setYyTo; yy >= currLowY; yy-=SCALED_SIZE) {
                 final int intY = yy;
                 //if (intY == prevY) continue;
                 
                 //if (intY < 0) continue;
-                int landToInsert = indexOfChkObj + nextIndex;
+                int landToInsert = indexOfChkObj + nextIndexY;
                 
                 GameObject insertObj;
                 //Hvis utspørringen etter første objekt med gyldige x-posisjon er nullifisert,
@@ -155,8 +160,9 @@ public class WorldLoaderFromList {
                     //Hvis boksene med koordinater ikke har noen felles ruter.
                     if(biggestLowX > smallestHighX || biggestLowY > smallestHighY) {firstUse = true;} else {firstUse = false;}
                     //Hvis denne x og y posisjonen er innenfor felles innlastnings-område som den forrige.
-                    if(xx >= biggestLowX && xx <= smallestHighX && yy >= biggestLowY && yy <= smallestHighY || !firstUse) {
-                        nextIndex++;
+                    if((intX >= biggestLowX && intX <= smallestHighX && yy >= biggestLowY && yy <= smallestHighY) && !firstUse) {
+                        //if(yy <= smallestHighY) continue;
+                        nextIndexY++;
                         continue;
                     }
                     
@@ -166,12 +172,13 @@ public class WorldLoaderFromList {
                     if(insertObj.getX() <= scaledPX + scaledChunk && insertObj.getY() <= scaledPY + scaledChunk){
                         handler.addObject(insertObj);
                         //GameObject filteredObj = handler.objects.stream().filter(GameObject ->).findFirst();
-                        nextIndex++;
+                        nextIndexY++;
                     }
                 }
                 prevY = intY;
             }
             prevX = intX;
+            nextIndexX++;
         }
         prevHighX = scaledLoadPosX + scaledChunk;
         prevHighY = scaledLoadPosY + scaledChunk;
