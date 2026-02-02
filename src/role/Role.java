@@ -73,7 +73,7 @@ public class Role extends Canvas implements Runnable{
     /** Avstanden i euklidisk forstand før innlastning av objekter gjøres på nytt. */
     public static int loadingRange = 5;
     /** Hvor langt unna objekter vil bli lastet inn fra spillerens posisjon. */
-    public static int chunk = 4;
+    public static int chunk = 12;
     /** Denne variabelen blir brukt til å se på spillerens x posisjon forrige gang WorldLoaderen ble brukt.*/
     static float loadPosX;
     /** Denne variabelen blir brukt til å se på spillerens y posisjon forrige gang WorldLoaderen ble brukt.*/

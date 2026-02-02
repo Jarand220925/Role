@@ -6,7 +6,9 @@
 package role;
 
 import java.awt.image.BufferedImage;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import static role.Role.SCALED_SIZE;
@@ -79,8 +81,9 @@ public class WorldLoaderFromList {
                 
                 if(red == 63 && green == 72 & blue == 204) worldHandler.addObject(new Sea(xx*SCALED_SIZE, yy*SCALED_SIZE, 1, ObjectId.Sea));
                 if(red == 34 && green == 177 & blue == 76) worldHandler.addObject(new Oak(xx*SCALED_SIZE, yy*SCALED_SIZE, 0, ObjectId.Oak));
-                if(red == 255 && green == 242 & blue == 0) worldHandler.addObject(new Plain(xx*SCALED_SIZE, yy*SCALED_SIZE, 2, ObjectId.Plain));
-                if(red == 181 && green == 230 & blue == 29) worldHandler.addObject(new OpenForest(xx*SCALED_SIZE, yy*SCALED_SIZE, 3, ObjectId.OpenForest));
+                if(red == 255 && green == 242 & blue == 0) {worldHandler.addObject(new Plain(xx*SCALED_SIZE, yy*SCALED_SIZE, 2, ObjectId.Plain));}
+                if(red == 181 && green == 230 & blue == 29) {worldHandler.addObject(new OpenForest(xx*SCALED_SIZE, yy*SCALED_SIZE, 3, ObjectId.OpenForest));}
+                else {worldHandler.addObject(null);}
                 
                 //if(px >= GameObject - range && px <=  + add && py >= newy - add && py <= newy + add )
                 //System.out.println("xx: " + xx);
@@ -131,8 +134,9 @@ public class WorldLoaderFromList {
             
             //if (intX == prevX) continue;
             // For hver indeks tellende fra null og oppover, vil y posisjonen endre seg i senkende verdi.
-            Optional<GameObject> go = worldHandler.objects.stream().filter(GameObject -> GameObject.getX() == intX).findFirst();
-            go = worldHandler.objects.stream().filter(GameObject -> GameObject.getX() <= intX && GameObject.getY() <= currHighY).findFirst();
+            //Optional<GameObject> lookGo = worldHandler.objects.stream().filter(GameObject -> GameObject.getX() == intX).findFirst();
+            // Optional har nullifiserings sikkerhet.
+            Optional<GameObject> go = worldHandler.objects.stream().filter(Objects::nonNull).filter(GameObject -> GameObject.getX() <= intX && GameObject.getY() <= currHighY).findFirst();
             GameObject landToCheck = null;
 
             //if(xx >= biggestLowX && xx <= smallestHighX && currLowY >= biggestLowY && currLowY <= smallestHighY) continue;
@@ -168,10 +172,16 @@ public class WorldLoaderFromList {
                     
                     
                     insertObj = worldHandler.objects.get(landToInsert);
-                
-                    if(insertObj.getX() <= scaledPX + scaledChunk && insertObj.getY() <= scaledPY + scaledChunk){
-                        handler.addObject(insertObj);
-                        //GameObject filteredObj = handler.objects.stream().filter(GameObject ->).findFirst();
+                    // Hvis objektet eksisterer.
+                    if(insertObj != null) {
+                        if(insertObj.getX() <= scaledPX + scaledChunk && insertObj.getY() <= scaledPY + scaledChunk){
+
+                                handler.addObject(insertObj);
+
+                            //GameObject filteredObj = handler.objects.stream().filter(GameObject ->).findFirst();
+                            nextIndexY++;
+                        }
+                    } else {
                         nextIndexY++;
                     }
                 }
@@ -180,10 +190,10 @@ public class WorldLoaderFromList {
             prevX = intX;
             nextIndexX++;
         }
-        prevHighX = scaledLoadPosX + scaledChunk;
-        prevHighY = scaledLoadPosY + scaledChunk;
-        prevLowX = scaledLoadPosX - scaledChunk;
-        prevLowY = scaledLoadPosY - scaledChunk;
+        prevHighX = scaledPX + scaledChunk;
+        prevHighY = scaledPY + scaledChunk;
+        prevLowX = scaledPX - scaledChunk;
+        prevLowY = scaledPY - scaledChunk;
         firstUse = false;
     }
     
@@ -228,7 +238,8 @@ public class WorldLoaderFromList {
                 if(red == 63 && green == 72 & blue == 204) worldHandler.addObject(new Sea(xx*SCALED_SIZE, yy*SCALED_SIZE, 1, ObjectId.Sea));
                 if(red == 34 && green == 177 & blue == 76) worldHandler.addObject(new Oak(xx*SCALED_SIZE, yy*SCALED_SIZE, 0, ObjectId.Oak));
                 if(red == 255 && green == 242 & blue == 0) worldHandler.addObject(new Plain(xx*SCALED_SIZE, yy*SCALED_SIZE, 2, ObjectId.Plain));
-                if(red == 181 && green == 230 & blue == 29) worldHandler.addObject(new OpenForest(xx*SCALED_SIZE, yy*SCALED_SIZE, 3, ObjectId.OpenForest));
+                if(red == 181 && green == 230 & blue == 29) {worldHandler.addObject(new OpenForest(xx*SCALED_SIZE, yy*SCALED_SIZE, 3, ObjectId.OpenForest));}
+                else if(red == 255 && green == 255 & blue == 255) {worldHandler.addObject(null);}
                 
                 //if(px >= GameObject - range && px <=  + add && py >= newy - add && py <= newy + add )
                 //System.out.println("xx: " + xx);
@@ -330,7 +341,7 @@ public class WorldLoaderFromList {
         int handlerSize = handler.objects.size();
         
         
-        while(handlerSize > chunk*chunk || handlerSize-1 > objsIterated) {
+        while(handlerSize-1 > objsIterated) {
             objsIterated++;
             if(handler.objects.get(index).getId() == ObjectId.Player) {
                 index++;
@@ -359,7 +370,7 @@ public class WorldLoaderFromList {
                     System.out.println("within player zone, or objectlist is bigger than set size.");
                     index++;
                 }
-            handlerSize--;
+            //handlerSize--;
             } 
         if(handler.objects.get(index).getId() == ObjectId.Player) {System.out.println("this is a player" + "  " + "where index is: " + index);}
         if(handler.objects.size() <= chunk*chunk) {System.out.println(String.format("Handler reached chunk*chunk size: ", chunk*chunk));}
