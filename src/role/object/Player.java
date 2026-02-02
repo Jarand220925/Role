@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import role.Handler;
 import static role.Role.FPS;
@@ -35,7 +36,7 @@ public class Player extends GameObject{
     
 
     @Override
-    public void tick(LinkedList<GameObject> objects) {
+    public void tick(ArrayList<GameObject> objects) {
         x += velX;
         y += velY;
         
@@ -46,7 +47,7 @@ public class Player extends GameObject{
         }
     }
 
-    private void Collision(LinkedList<GameObject> object) {
+    private void Collision(ArrayList<GameObject> object) {
         for(int i = 0; i < handler.objects.size(); i++) {
             GameObject tempObject = handler.objects.get(i);
     

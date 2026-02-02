@@ -7,6 +7,7 @@ package role.framework;
 
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -28,7 +29,7 @@ public abstract class GameObject {
         this.id = id;
     }
     
-    public abstract void tick(LinkedList<GameObject> objectList);
+    public abstract void tick(ArrayList<GameObject> objectList);
     public abstract void render(Graphics g);
     public abstract Rectangle getBounds();
     

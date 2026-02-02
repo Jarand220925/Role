@@ -11,6 +11,7 @@ import role.framework.GameObject;
 import role.framework.ObjectId;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import role.Role;
 import static role.Role.debugRole;
@@ -36,7 +37,7 @@ public class Sea extends GameObject implements LandscapeObject {
     Texture tex = Role.getInstance();
 
     @Override
-    public void tick(LinkedList<GameObject> objects) {
+    public void tick(ArrayList<GameObject> objects) {
         if(debugRole) {
             index = objects.indexOf(this);
         }

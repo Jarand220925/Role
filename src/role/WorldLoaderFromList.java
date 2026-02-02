@@ -33,13 +33,22 @@ import role.object.Sea;
  */
 public class WorldLoaderFromList {
     Handler worldHandler;
+    GameObject[][] landscapeArray;
     
+    private int h;
+    private int w;
     private int prevLowX;
     private int prevLowY;
     private int prevHighX;
     private int prevHighY;
     public boolean firstUse = true;
+    /** Bare hvor mange land i begge akser. */
+    private int setAmountOfLands;
     
+    public WorldLoaderFromList(BufferedImage image) {
+        this.h = image.getHeight();
+        this.w = image.getWidth();
+    }
     //List<GameObject> wH;
     public void init() {
         worldHandler = new Handler();
@@ -52,6 +61,8 @@ public class WorldLoaderFromList {
     public void loadImageLevel(BufferedImage image) {
         int w = image.getWidth();
         int h = image.getHeight();
+        
+        landscapeArray = new GameObject[w][h];
         
         int py = (int)explorer.getY()/SCALED_SIZE;
         int px = (int)explorer.getX()/SCALED_SIZE;
@@ -79,11 +90,11 @@ public class WorldLoaderFromList {
                 int green = (pixel >> 8) & 0xff;
                 int blue = (pixel) & 0xff;
                 
-                if(red == 63 && green == 72 & blue == 204) worldHandler.addObject(new Sea(xx*SCALED_SIZE, yy*SCALED_SIZE, 1, ObjectId.Sea));
-                if(red == 34 && green == 177 & blue == 76) worldHandler.addObject(new Oak(xx*SCALED_SIZE, yy*SCALED_SIZE, 0, ObjectId.Oak));
-                if(red == 255 && green == 242 & blue == 0) {worldHandler.addObject(new Plain(xx*SCALED_SIZE, yy*SCALED_SIZE, 2, ObjectId.Plain));}
-                if(red == 181 && green == 230 & blue == 29) {worldHandler.addObject(new OpenForest(xx*SCALED_SIZE, yy*SCALED_SIZE, 3, ObjectId.OpenForest));}
-                else {worldHandler.addObject(null);}
+                if(red == 63 && green == 72 & blue == 204) landscapeArray[xx][yy] = new Sea(xx*SCALED_SIZE, yy*SCALED_SIZE, 1, ObjectId.Sea);
+                if(red == 34 && green == 177 & blue == 76) landscapeArray[xx][yy] = new Oak(xx*SCALED_SIZE, yy*SCALED_SIZE, 0, ObjectId.Oak);
+                if(red == 255 && green == 242 & blue == 0) {landscapeArray[xx][yy] = new Plain(xx*SCALED_SIZE, yy*SCALED_SIZE, 2, ObjectId.Plain);}
+                if(red == 181 && green == 230 & blue == 29) {landscapeArray[xx][yy] = new OpenForest(xx*SCALED_SIZE, yy*SCALED_SIZE, 3, ObjectId.OpenForest);}
+                else {landscapeArray[xx][yy] = null;}
                 
                 //if(px >= GameObject - range && px <=  + add && py >= newy - add && py <= newy + add )
                 //System.out.println("xx: " + xx);
@@ -100,7 +111,7 @@ public class WorldLoaderFromList {
         // Spillerens posisjon ved forrige innlastning.
         int scaledLoadPosX = (int) loadPosX * SCALED_SIZE;
         int scaledLoadPosY = (int) loadPosY * SCALED_SIZE;
-        // Spillerens x og y posisjon.
+        // Spillerens ix og y posisjon.
         int scaledPX = (int) explorer.getX();
         int scaledPY = (int) explorer.getY();
         int px = scaledPX/SCALED_SIZE;
@@ -158,12 +169,12 @@ public class WorldLoaderFromList {
                 int landToInsert = indexOfChkObj + nextIndexY;
                 
                 GameObject insertObj;
-                //Hvis utspørringen etter første objekt med gyldige x-posisjon er nullifisert,
+                //Hvis utspørringen etter første objekt med gyldige ix-posisjon er nullifisert,
                 // eller om landToInsert er større enn gyldige indekser i worldHandler.
                 if(indexOfChkObj > -1 && landToInsert < worldHandlerSize){
                     //Hvis boksene med koordinater ikke har noen felles ruter.
                     if(biggestLowX > smallestHighX || biggestLowY > smallestHighY) {firstUse = true;} else {firstUse = false;}
-                    //Hvis denne x og y posisjonen er innenfor felles innlastnings-område som den forrige.
+                    //Hvis denne ix og y posisjonen er innenfor felles innlastnings-område som den forrige.
                     if((intX >= biggestLowX && intX <= smallestHighX && yy >= biggestLowY && yy <= smallestHighY) && !firstUse) {
                         //if(yy <= smallestHighY) continue;
                         nextIndexY++;
@@ -198,21 +209,27 @@ public class WorldLoaderFromList {
     }
     
     public void loadFivehundredRandomLands(Handler handler) {
+        
+        int arraySizeX = landscapeArray.length;
+        
         for(int i = 0; i < 500; i++) {
             Random rnd = new Random();
-            int range = rnd.nextInt(worldHandler.objects.size() - 1);
-            GameObject randomObject = worldHandler.objects.get(range);
+            int rangeX = rnd.nextInt(arraySizeX - 1);
+            int rangeY = rnd.nextInt(landscapeArray[rangeX].length - 1);
+            GameObject randomObject = landscapeArray[rangeX][rangeY];
             handler.addObject(randomObject);
         }
     }
     
     /** Lagt til for å teste uten å vente på at alle landene må bli lastet inn.
      * @param image bilde som skal skannes. */
-    public void loadOnlyThousandFromImage(BufferedImage image) {
+    public void loadLimitedAmountFromImage(BufferedImage image) {
         int w = image.getWidth();
         int h = image.getHeight();
         
-        int setAmount = 50;
+        setAmountOfLands = 50;
+        
+        landscapeArray = new GameObject[setAmountOfLands][setAmountOfLands];
         
         int py = (int)explorer.getY()/SCALED_SIZE;
         int px = (int)explorer.getX()/SCALED_SIZE;
@@ -223,8 +240,8 @@ public class WorldLoaderFromList {
         
         //for(int yy = 0; yy < w; yy++) Brukes for å legge inn ruter basert på størrelsen av bilde.
         int landsmade = 0;
-        for(int xx = 0; xx < setAmount; xx++) {
-            for(int yy = 0; yy < setAmount; yy++) {
+        for(int xx = 0; xx < setAmountOfLands; xx++) {
+            for(int yy = 0; yy < setAmountOfLands; yy++) {
                 
                 if(xx < 0 || yy < 0 || xx > h || yy > w) {
                     System.out.println("skipped: " + xx + " " + yy);
@@ -235,11 +252,17 @@ public class WorldLoaderFromList {
                 int green = (pixel >> 8) & 0xff;
                 int blue = (pixel) & 0xff;
                 
-                if(red == 63 && green == 72 & blue == 204) worldHandler.addObject(new Sea(xx*SCALED_SIZE, yy*SCALED_SIZE, 1, ObjectId.Sea));
-                if(red == 34 && green == 177 & blue == 76) worldHandler.addObject(new Oak(xx*SCALED_SIZE, yy*SCALED_SIZE, 0, ObjectId.Oak));
-                if(red == 255 && green == 242 & blue == 0) worldHandler.addObject(new Plain(xx*SCALED_SIZE, yy*SCALED_SIZE, 2, ObjectId.Plain));
-                if(red == 181 && green == 230 & blue == 29) {worldHandler.addObject(new OpenForest(xx*SCALED_SIZE, yy*SCALED_SIZE, 3, ObjectId.OpenForest));}
-                else if(red == 255 && green == 255 & blue == 255) {worldHandler.addObject(null);}
+                if(red == 63 && green == 72 & blue == 204) landscapeArray[xx][yy] = new Sea(xx*SCALED_SIZE, yy*SCALED_SIZE, 1, ObjectId.Sea);
+                if(red == 34 && green == 177 & blue == 76) landscapeArray[xx][yy] = new Oak(xx*SCALED_SIZE, yy*SCALED_SIZE, 0, ObjectId.Oak);
+                if(red == 255 && green == 242 & blue == 0) landscapeArray[xx][yy] = new Plain(xx*SCALED_SIZE, yy*SCALED_SIZE, 2, ObjectId.Plain);
+                if(red == 181 && green == 230 & blue == 29) {landscapeArray[xx][yy] = new OpenForest(xx*SCALED_SIZE, yy*SCALED_SIZE, 3, ObjectId.OpenForest);}
+                else if(red == 255 && green == 255 & blue == 255) {landscapeArray[xx][yy] = null;}
+                
+//                if(red == 63 && green == 72 & blue == 204) worldHandler.addObject(new Sea(xx*SCALED_SIZE, yy*SCALED_SIZE, 1, ObjectId.Sea));
+//                if(red == 34 && green == 177 & blue == 76) worldHandler.addObject(new Oak(xx*SCALED_SIZE, yy*SCALED_SIZE, 0, ObjectId.Oak));
+//                if(red == 255 && green == 242 & blue == 0) worldHandler.addObject(new Plain(xx*SCALED_SIZE, yy*SCALED_SIZE, 2, ObjectId.Plain));
+//                if(red == 181 && green == 230 & blue == 29) {worldHandler.addObject(new OpenForest(xx*SCALED_SIZE, yy*SCALED_SIZE, 3, ObjectId.OpenForest));}
+//                else if(red == 255 && green == 255 & blue == 255) {worldHandler.addObject(null);}
                 
                 //if(px >= GameObject - range && px <=  + add && py >= newy - add && py <= newy + add )
                 //System.out.println("xx: " + xx);
@@ -253,7 +276,24 @@ public class WorldLoaderFromList {
     }
     
     public void addItAll(Handler handler) {
-        handler.objects.addAll(0, worldHandler.objects);
+        
+        int countIteration = 0;
+        // Dimensjoner?
+        int arraySize = landscapeArray.length;
+        for(int ix = 0; ix < w; ix++){
+            for(int iy = 0; iy < h; iy++) {
+                
+                countIteration++;
+                
+                if (ix + 1 > arraySize) {
+                    return;
+                }
+                if(iy + 1 > landscapeArray[ix].length) {
+                    continue;
+                }
+                handler.addObject(landscapeArray[ix][iy]);
+            }
+        }
     }
     
     public void removeTerrain(Handler handler) {
@@ -359,7 +399,7 @@ public class WorldLoaderFromList {
                 handler.tempRemoveObject(objectForRemoval);
                     
 //                    System.out.println("Marked and removed: " + objectForRemoval.getId() + " Index size is now: " + handler.objects.size());
-//                    System.out.println("Removed object with coordinates: " + ox + " x " + oy + " y ");
+//                    System.out.println("Removed object with coordinates: " + ox + " ix " + oy + " y ");
                     
 //                    System.out.println("marked?: " + objectForRemoval.getDelete());
                 } else if (handler.objects.size() <= 4) {

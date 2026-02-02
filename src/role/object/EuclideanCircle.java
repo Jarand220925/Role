@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import static role.Role.SCALED_SIZE;
 import static role.Role.explorer;
@@ -41,7 +42,7 @@ public class EuclideanCircle extends GameObject {
     }
 
     @Override
-    public void tick(LinkedList<GameObject> objectList) {
+    public void tick(ArrayList<GameObject> objectList) {
     }
 
     @Override
