@@ -72,7 +72,7 @@ public class Role extends Canvas implements Runnable{
     public static int loadingPos = 0;
     
     /** Hvor langt unna objekter vil bli lastet inn fra spillerens posisjon. */
-    public static int chunk = 12;
+    public static int chunk = 4;
     /** Avstanden i euklidisk forstand før innlastning av objekter gjøres på nytt. */
     public static int loadingRange = chunk/2;
     /** Denne variabelen blir brukt til å se på spillerens x posisjon forrige gang WorldLoaderen ble brukt.*/
@@ -129,7 +129,7 @@ public class Role extends Canvas implements Runnable{
         //worldLoaderFromList.loadImageLevel(world);
         worldLoaderFromList.loadLimitedAmountFromImage(world);
         //worldLoaderFromList.loadFivehundredRandomLands(handler);
-        worldLoaderFromList.addItAll(handler);
+        //worldLoaderFromList.addItAll(handler);
         worldLoaderFromList.loadLandscape(handler);
         //worldLoader = new WorldLoader();
         //worldLoader.loadImageLevel(world, handler);

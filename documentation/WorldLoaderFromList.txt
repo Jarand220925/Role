@@ -1,0 +1,8 @@
+Pseudokode
+
+// Er verdien innenfor.
+if(y >= landscapeArray[ix].length) {
+    continue;
+}
+
+

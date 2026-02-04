@@ -111,7 +111,7 @@ public class WorldLoaderFromList {
         // Spillerens posisjon ved forrige innlastning.
         int scaledLoadPosX = (int) loadPosX * SCALED_SIZE;
         int scaledLoadPosY = (int) loadPosY * SCALED_SIZE;
-        // Spillerens ix og y posisjon.
+        // Spillerens x og y posisjon.
         int scaledPX = (int) explorer.getX();
         int scaledPY = (int) explorer.getY();
         int px = scaledPX/SCALED_SIZE;
@@ -120,37 +120,50 @@ public class WorldLoaderFromList {
         int scaledChunk = chunk * SCALED_SIZE;
         
         // Unøyaktig
-        int currHighX = scaledPX + scaledChunk;
-        int currHighY = scaledPY + scaledChunk;
-        int currLowX = scaledPX - scaledChunk;
-        int currLowY = scaledPY - scaledChunk;
+        int scaledCurrHighX = scaledPX + scaledChunk;
+        int scaledCurrHighY = scaledPY + scaledChunk;
+        int scaledCurrLowX = scaledPX - scaledChunk;
+        int scaledCurrLowY = scaledPY - scaledChunk;
+        int currHighX = px + chunk; 
+        int currHighY = py + chunk;
+        int currLowX = px - chunk;
+        int currLowY = py - chunk;
         
-        int smallestHighX = Math.min(prevHighX, currHighX);
-        int biggestLowX = Math.max(prevLowX, currLowX);
-        int smallestHighY = Math.min(prevHighY, currHighY);
-        int biggestLowY = Math.max(prevLowY, currLowY);
+        int scaledSmallestHighX = Math.min(prevHighX, scaledCurrHighX);
+        int scaledBiggestLowX = Math.max(prevLowX, scaledCurrLowX);
+        int scaledSmallestHighY = Math.min(prevHighY, scaledCurrHighY);
+        int scaledBiggestLowY = Math.max(prevLowY, scaledCurrLowY);
+        int smallestHighX = Math.min(prevHighX/SCALED_SIZE, currHighX);
+        int biggestLowX = Math.max(prevLowX/SCALED_SIZE, currLowX);
+        int smallestHighY = Math.min(prevHighY/SCALED_SIZE, currHighY);
+        int biggestLowY = Math.max(prevLowY/SCALED_SIZE, currLowY);
+        
         
         int worldHandlerSize = worldHandler.objects.size();
         
         //int intX;
         int prevX = 0;
         int prevY = 0;
-        int setXxTo = px * SCALED_SIZE - scaledChunk;
+        int setXxTo = px - chunk;
         int setYyTo = py * SCALED_SIZE + scaledChunk;
+        int currX = landscapeArray.length;
+        int currDimensionLength;
         int nextIndexX = 0;
-        for(int xx = setXxTo; xx <= currHighX; xx+=SCALED_SIZE) {
+        
+        //Hvis boksene med koordinater ikke har noen felles ruter.
+        if(scaledBiggestLowX > scaledSmallestHighX || scaledBiggestLowY > scaledSmallestHighY) {firstUse = true;} else {firstUse = false;}
+        
+        for(int xx = currLowX; xx <= currHighX; xx++) {
             
             int nextIndexY = 0;
-            final int intX = currHighX - nextIndexX * SCALED_SIZE;
+            final int intX = xx;
             
-            //if (intX == prevX) continue;
-            // For hver indeks tellende fra null og oppover, vil y posisjonen endre seg i senkende verdi.
-            //Optional<GameObject> lookGo = worldHandler.objects.stream().filter(GameObject -> GameObject.getX() == intX).findFirst();
             // Optional har nullifiserings sikkerhet.
-            Optional<GameObject> go = worldHandler.objects.stream().filter(Objects::nonNull).filter(GameObject -> GameObject.getX() <= intX && GameObject.getY() <= currHighY).findFirst();
+            Optional<GameObject> go = worldHandler.objects.stream().filter(Objects::nonNull).filter(GameObject -> GameObject.getX() <= intX && GameObject.getY() <= scaledCurrHighY).findFirst();
             GameObject landToCheck = null;
+            //Optional<GameObject> oGo = landscapeArray[xx][0];
 
-            //if(xx >= biggestLowX && xx <= smallestHighX && currLowY >= biggestLowY && currLowY <= smallestHighY) continue;
+            //if(xx >= scaledBiggestLowX && xx <= scaledSmallestHighX && currLowY >= biggestLowY && currLowY <= smallestHighY) continue;
                 
             if(go.isPresent()){
                 landToCheck = go.get();
@@ -160,40 +173,29 @@ public class WorldLoaderFromList {
             // Indeksen av objektet fra første utspørring.
             int indexOfChkObj = worldHandler.objects.indexOf(landToCheck);
             
+            if(xx < 0 || xx >= landscapeArray.length) {continue;}
             
-            for(int yy = setYyTo; yy >= currLowY; yy-=SCALED_SIZE) {
+            for(int yy = currLowY; yy <= currHighY; yy++) {
                 final int intY = yy;
-                //if (intY == prevY) continue;
                 
-                //if (intY < 0) continue;
+                if(yy < 0 || yy >= landscapeArray[xx].length) {continue;}
+                
                 int landToInsert = indexOfChkObj + nextIndexY;
-                
                 GameObject insertObj;
-                //Hvis utspørringen etter første objekt med gyldige ix-posisjon er nullifisert,
-                // eller om landToInsert er større enn gyldige indekser i worldHandler.
-                if(indexOfChkObj > -1 && landToInsert < worldHandlerSize){
-                    //Hvis boksene med koordinater ikke har noen felles ruter.
-                    if(biggestLowX > smallestHighX || biggestLowY > smallestHighY) {firstUse = true;} else {firstUse = false;}
-                    //Hvis denne ix og y posisjonen er innenfor felles innlastnings-område som den forrige.
-                    if((intX >= biggestLowX && intX <= smallestHighX && yy >= biggestLowY && yy <= smallestHighY) && !firstUse) {
-                        //if(yy <= smallestHighY) continue;
-                        nextIndexY++;
-                        continue;
-                    }
+                
+                    
+                //Hvis denne x og y posisjonen er innenfor felles innlastnings-område som den forrige.
+                if((xx >= biggestLowX && xx <= smallestHighX && yy >= biggestLowY && yy <= smallestHighY) && !firstUse) {
+                    continue;
+                }
                     
                     
-                    insertObj = worldHandler.objects.get(landToInsert);
-                    // Hvis objektet eksisterer.
-                    if(insertObj != null) {
-                        if(insertObj.getX() <= scaledPX + scaledChunk && insertObj.getY() <= scaledPY + scaledChunk){
+                insertObj = landscapeArray[xx][yy];
+                // Hvis objektet eksisterer.
+                if(insertObj != null) {
+                    if(insertObj.getX() <= scaledPX + scaledChunk && insertObj.getY() <= scaledPY + scaledChunk){
 
-                                handler.addObject(insertObj);
-
-                            //GameObject filteredObj = handler.objects.stream().filter(GameObject ->).findFirst();
-                            nextIndexY++;
-                        }
-                    } else {
-                        nextIndexY++;
+                            handler.addObject(insertObj);
                     }
                 }
                 prevY = intY;
@@ -371,7 +373,6 @@ public class WorldLoaderFromList {
     
     public void removeTerrainWhile(Handler handler) {
         
-        //float chunk = this.chunk;
         int py = (int) explorer.getY()/SCALED_SIZE;
         int px = (int) explorer.getX()/SCALED_SIZE;
         
@@ -381,11 +382,11 @@ public class WorldLoaderFromList {
         int handlerSize = handler.objects.size();
         
         
-        while(handlerSize-1 > objsIterated) {
+        while(objsIterated < handlerSize) {
             objsIterated++;
             if(handler.objects.get(index).getId() == ObjectId.Player) {
                 index++;
-                //handlerSize--;
+                //System.out.println("this is a player" + "  " + "where index is: " + index);
                 continue;
             }
             
@@ -395,26 +396,21 @@ public class WorldLoaderFromList {
             if(ox < px - chunk || oy < py - chunk || ox > px + chunk || oy > py + chunk) {
                 GameObject objectForRemoval = handler.objects.get(index);
 //                    System.out.println("index: " + handler.objects.indexOf(objectForRemoval));
-                objectForRemoval.setDelete(true);
+//                objectForRemoval.setDelete(true);
                 handler.tempRemoveObject(objectForRemoval);
                     
 //                    System.out.println("Marked and removed: " + objectForRemoval.getId() + " Index size is now: " + handler.objects.size());
-//                    System.out.println("Removed object with coordinates: " + ox + " ix " + oy + " y ");
+//                    System.out.println("Removed object with coordinates: " + ox + " x " + oy + " y ");
                     
 //                    System.out.println("marked?: " + objectForRemoval.getDelete());
-                } else if (handler.objects.size() <= 4) {
-                    System.out.println("Ended removal");
-                    return;
-                } else {
-                    // ikke riktig
-                    System.out.println("within player zone, or objectlist is bigger than set size.");
-                    index++;
-                }
-            //handlerSize--;
-            } 
-        if(handler.objects.get(index).getId() == ObjectId.Player) {System.out.println("this is a player" + "  " + "where index is: " + index);}
-        if(handler.objects.size() <= chunk*chunk) {System.out.println(String.format("Handler reached chunk*chunk size: ", chunk*chunk));}
-        
+            } else if (handler.objects.size() <= 1) {
+                System.out.println("Ended removal");
+                return;
+            } else {
+                //System.out.println("within player zone, or objectlist is bigger than set size.");
+                index++;
+            }
+        } 
     }
 
 //    public void run() {

@@ -90,14 +90,17 @@ public class Player extends GameObject{
         }
         if(debugRole) {
             String debugNumber = String.format("index: %d", index);
+            
             g.setColor(Color.LIGHT_GRAY);
             
             g.drawString(debugNumber, (int)x, (int)y);
+            g.drawString(String.format("X: %f Y: %f", this.x, this.y), (int) x, (int) y - 15);
         }
         if(debugRole) {
             Font font = new Font("Courier New", Font.BOLD, 16);
             g.setFont(font);
             g.drawString(String.format("FPS: %d frame: %d", FPS, frames), (int) (x - 5*SCALED_SIZE), (int) (y - 3*SCALED_SIZE));
+            
         }
     }
 
