@@ -32,6 +32,8 @@ public class Handler {
         }
     }
     
+    /** Denne metoden går igjennom alle objektene og gjengir dem grafisk.
+     * @param g */
     public void render(Graphics g) {
         for(int i = 0; i < objects.size(); i++) {
             tempObject = objects.get(i);

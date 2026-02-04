@@ -138,57 +138,23 @@ public class WorldLoaderFromList {
         int smallestHighY = Math.min(prevHighY/SCALED_SIZE, currHighY);
         int biggestLowY = Math.max(prevLowY/SCALED_SIZE, currLowY);
         
-        
-        int worldHandlerSize = worldHandler.objects.size();
-        
-        //int intX;
-        int prevX = 0;
-        int prevY = 0;
-        int setXxTo = px - chunk;
-        int setYyTo = py * SCALED_SIZE + scaledChunk;
-        int currX = landscapeArray.length;
-        int currDimensionLength;
-        int nextIndexX = 0;
-        
         //Hvis boksene med koordinater ikke har noen felles ruter.
         if(scaledBiggestLowX > scaledSmallestHighX || scaledBiggestLowY > scaledSmallestHighY) {firstUse = true;} else {firstUse = false;}
         
         for(int xx = currLowX; xx <= currHighX; xx++) {
             
-            int nextIndexY = 0;
-            final int intX = xx;
-            
-            // Optional har nullifiserings sikkerhet.
-            Optional<GameObject> go = worldHandler.objects.stream().filter(Objects::nonNull).filter(GameObject -> GameObject.getX() <= intX && GameObject.getY() <= scaledCurrHighY).findFirst();
-            GameObject landToCheck = null;
-            //Optional<GameObject> oGo = landscapeArray[xx][0];
-
-            //if(xx >= scaledBiggestLowX && xx <= scaledSmallestHighX && currLowY >= biggestLowY && currLowY <= smallestHighY) continue;
-                
-            if(go.isPresent()){
-                landToCheck = go.get();
-            }
-                
-            
-            // Indeksen av objektet fra første utspørring.
-            int indexOfChkObj = worldHandler.objects.indexOf(landToCheck);
-            
             if(xx < 0 || xx >= landscapeArray.length) {continue;}
             
             for(int yy = currLowY; yy <= currHighY; yy++) {
-                final int intY = yy;
                 
                 if(yy < 0 || yy >= landscapeArray[xx].length) {continue;}
                 
-                int landToInsert = indexOfChkObj + nextIndexY;
                 GameObject insertObj;
-                
-                    
+                   
                 //Hvis denne x og y posisjonen er innenfor felles innlastnings-område som den forrige.
                 if((xx >= biggestLowX && xx <= smallestHighX && yy >= biggestLowY && yy <= smallestHighY) && !firstUse) {
                     continue;
                 }
-                    
                     
                 insertObj = landscapeArray[xx][yy];
                 // Hvis objektet eksisterer.
@@ -198,10 +164,7 @@ public class WorldLoaderFromList {
                             handler.addObject(insertObj);
                     }
                 }
-                prevY = intY;
             }
-            prevX = intX;
-            nextIndexX++;
         }
         prevHighX = scaledPX + scaledChunk;
         prevHighY = scaledPY + scaledChunk;
@@ -260,14 +223,6 @@ public class WorldLoaderFromList {
                 if(red == 181 && green == 230 & blue == 29) {landscapeArray[xx][yy] = new OpenForest(xx*SCALED_SIZE, yy*SCALED_SIZE, 3, ObjectId.OpenForest);}
                 else if(red == 255 && green == 255 & blue == 255) {landscapeArray[xx][yy] = null;}
                 
-//                if(red == 63 && green == 72 & blue == 204) worldHandler.addObject(new Sea(xx*SCALED_SIZE, yy*SCALED_SIZE, 1, ObjectId.Sea));
-//                if(red == 34 && green == 177 & blue == 76) worldHandler.addObject(new Oak(xx*SCALED_SIZE, yy*SCALED_SIZE, 0, ObjectId.Oak));
-//                if(red == 255 && green == 242 & blue == 0) worldHandler.addObject(new Plain(xx*SCALED_SIZE, yy*SCALED_SIZE, 2, ObjectId.Plain));
-//                if(red == 181 && green == 230 & blue == 29) {worldHandler.addObject(new OpenForest(xx*SCALED_SIZE, yy*SCALED_SIZE, 3, ObjectId.OpenForest));}
-//                else if(red == 255 && green == 255 & blue == 255) {worldHandler.addObject(null);}
-                
-                //if(px >= GameObject - range && px <=  + add && py >= newy - add && py <= newy + add )
-                //System.out.println("xx: " + xx);
                 landsmade++;
                 }
             }
@@ -297,7 +252,8 @@ public class WorldLoaderFromList {
             }
         }
     }
-    
+    /** Ikke brukt
+     * @param handler */
     public void removeTerrain(Handler handler) {
         
         //float chunk = this.chunk;
@@ -370,7 +326,8 @@ public class WorldLoaderFromList {
                 
                 
     }
-    
+    /** Fjerner landskapsobjekter fra listen som blir gitt. Dette gjøres i stigende rekkefølge.
+     * @param handler listebehandler*/
     public void removeTerrainWhile(Handler handler) {
         
         int py = (int) explorer.getY()/SCALED_SIZE;
@@ -420,7 +377,7 @@ public class WorldLoaderFromList {
 //    }
     /** Utfører utregning på hvor spilleren befinner seg på kartet,
      * og legger ser om spilleren har beveget seg en gitt distanse fra det punktet.
-     * Hvis spilleren har beveget seg den gitte distansen, nevn ovenfor, vil landskap bli
+     * Hvis spilleren har beveget seg den gitte distansen, nevnt ovenfor, vil landskap bli
      * stokket om.
      * @param handler listebehandler
      */
@@ -429,19 +386,12 @@ public class WorldLoaderFromList {
         int px = (int) explorer.getX()/SCALED_SIZE;
         loadingPos = (int)Math.sqrt((double)((px-loadPosX)*(px-loadPosX)+(py-loadPosY)*(py-loadPosY)));
         if (loadingRange < loadingPos) {
-            //worldLoader.removeTerrain(handler);
-            //worldLoader.loadImageAgain(world,handler);
-            //removeTerrain(handler);
             removeTerrainWhile(handler);
             loadLandscape(handler);
             loadPosX = (int) explorer.getX()/SCALED_SIZE;
             loadPosY = (int) explorer.getY()/SCALED_SIZE;
             euclideanCircle.rearrange();
             loadingPos = 0;
-            //CompletableFuture.supplyAsync(() -> "Hello").thenApply(s -> s + " World!").thenAccept(System::out::println);
         }
-//        if ( (px*px+py*py) < loadingpos - loadingrange || (int) (px*px+py*py) > loadingpos + loadingrange) {
-//                    removeTerrain();
-//                }
     } 
 }

@@ -72,7 +72,7 @@ public class Role extends Canvas implements Runnable{
     public static int loadingPos = 0;
     
     /** Hvor langt unna objekter vil bli lastet inn fra spillerens posisjon. */
-    public static int chunk = 4;
+    public static int chunk = 12;
     /** Avstanden i euklidisk forstand før innlastning av objekter gjøres på nytt. */
     public static int loadingRange = chunk/2;
     /** Denne variabelen blir brukt til å se på spillerens x posisjon forrige gang WorldLoaderen ble brukt.*/
@@ -148,13 +148,13 @@ public class Role extends Canvas implements Runnable{
         thread.start();
     }
     
-    /** Objektene har en funksjon i sin klasse som bestemmer når de blir tegnet. */
+    /** Objektene har en funksjon i sin klasse som bestemmer når de blir grafisk gjengitt. */
     private void renderContent(){
             BufferStrategy bs = this.getBufferStrategy();
         if(bs == null){
             this.createBufferStrategy(3);
             return;
-            }
+        }
         
         Graphics g = bs.getDrawGraphics();
         Graphics2D g2d = (Graphics2D) g;
@@ -225,12 +225,13 @@ public class Role extends Canvas implements Runnable{
                 cam.tick(handler.objects.get(i));
                 //worldLoader.checkForRearrange(world,handler);
                 worldLoaderFromList.checkForRearrange(handler);
-                
-                
+                  
             }
         }
     }  
-        
+    
+    /** ???
+     * @return  */
     public static Texture getInstance() {
         return tex;
     }
