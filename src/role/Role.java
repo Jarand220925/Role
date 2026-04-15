@@ -50,7 +50,7 @@ public class Role extends Canvas implements Runnable{
     public static boolean debugRole;
     public static int frames;
     public static int FPS;
-
+    
     public static boolean isDebugRole() {
         return debugRole;
     }
@@ -127,7 +127,8 @@ public class Role extends Canvas implements Runnable{
         worldLoaderFromList = new WorldLoaderFromList(world);
         worldLoaderFromList.init();
         //worldLoaderFromList.loadImageLevel(world);
-        worldLoaderFromList.loadLimitedAmountFromImage(world);
+        //worldLoaderFromList.loadLimitedAmountFromImage(world);
+        worldLoaderFromList.loadLimitedAmountFromImageFuture(world);
         //worldLoaderFromList.loadFivehundredRandomLands(handler);
         //worldLoaderFromList.addItAll(handler);
         worldLoaderFromList.loadLandscape(handler);

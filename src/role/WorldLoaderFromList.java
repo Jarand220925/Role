@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import static role.Role.SCALED_SIZE;
 import static role.Role.appIsRunning;
 import static role.Role.chunk;
@@ -230,6 +233,116 @@ public class WorldLoaderFromList {
         //System.out.println("objects-list size: " + handler.objects.size());
         System.out.println("tiles looped: " + landsmade);
         //System.out.println("px: " +  px );
+    }
+    
+    /** Genererer et begrenset antall land i landskapstabellen med en gang og fullfører generering av resten i bakgrunnen.
+     * Lagt til for å teste uten å vente på at alle landene må bli lastet inn.
+     * @param image bilde som skal skannes. */
+    public void loadLimitedAmountFromImageFuture(BufferedImage image) {
+        int w = image.getWidth();
+        int h = image.getHeight();
+        
+        setAmountOfLands = 50;
+        
+        landscapeArray = new GameObject[w][h];
+        
+        int py = (int)explorer.getY()/SCALED_SIZE;
+        int px = (int)explorer.getX()/SCALED_SIZE;
+
+        System.out.println("Loading land");
+        System.out.println("Image width and height: " + w + " " + h);
+        System.out.println("Player x and y: " + px + " " + py);
+        
+        //for(int yy = 0; yy < w; yy++) Brukes for å legge inn ruter basert på størrelsen av bilde.
+        int landsLoaded = 0;
+        for(int xx = 0; xx < setAmountOfLands; xx++) {
+            for(int yy = 0; yy < setAmountOfLands; yy++) {
+                
+                if(xx < 0 || yy < 0 || xx > h || yy > w) {
+                    System.out.println("skipped: " + xx + " " + yy);
+                } else {
+                System.out.println("xx yy: " + xx + " " + yy);
+                int pixel = image.getRGB(xx, yy);
+                int red = (pixel >> 16) & 0xff;
+                int green = (pixel >> 8) & 0xff;
+                int blue = (pixel) & 0xff;
+                
+                if(red == 63 && green == 72 & blue == 204) landscapeArray[xx][yy] = new Sea(xx*SCALED_SIZE, yy*SCALED_SIZE, 1, ObjectId.Sea);
+                if(red == 34 && green == 177 & blue == 76) landscapeArray[xx][yy] = new Oak(xx*SCALED_SIZE, yy*SCALED_SIZE, 0, ObjectId.Oak);
+                if(red == 255 && green == 242 & blue == 0) landscapeArray[xx][yy] = new Plain(xx*SCALED_SIZE, yy*SCALED_SIZE, 2, ObjectId.Plain);
+                if(red == 181 && green == 230 & blue == 29) {landscapeArray[xx][yy] = new OpenForest(xx*SCALED_SIZE, yy*SCALED_SIZE, 3, ObjectId.OpenForest);}
+                else if(red == 255 && green == 255 & blue == 255) {landscapeArray[xx][yy] = null;}
+                
+                landsLoaded++;
+                }
+            }
+        }
+        //System.out.println("objects-list size: " + handler.objects.size());
+        System.out.println("tiles looped: " + landsLoaded);
+        //System.out.println("px: " +  px );
+        CompletableFuture backgroundLoading = backgroundLoad(image,setAmountOfLands);
+    }
+    
+    /**
+     * Skal generere landskap og legge det i landskapstabellen. Kjøres i bakgrunnen.
+     * @param image bilde som skal skannes.
+     * @param begin Dette er hvor innlasting av landskap stoppet, og hvor innlasting av flere landskap skal starte fra.
+     * @return 
+     */
+    private CompletableFuture<Void> backgroundLoad(BufferedImage image,int begin){
+        CompletableFuture<Void> future = new CompletableFuture();
+        
+        Executors.newCachedThreadPool().submit(() -> {
+            int landsLoaded = 0;
+            boolean reachedCrossingPoint = false;
+            try {
+                for (int xx = 0; xx < h; xx++) {
+                    boolean newIterationXx = true;
+                    for (int yy = begin; yy < w; yy++) {
+                        
+                        if (xx == begin && yy == begin && reachedCrossingPoint == false){
+                            reachedCrossingPoint = true;
+                        }
+                        if (reachedCrossingPoint == true && newIterationXx == true){
+                            newIterationXx = false;
+                            yy = yy - begin;
+                        }
+                        
+                        if (xx < 0 || yy < 0 || xx > h || yy > w) {
+                            System.out.println("skipped: " + xx + " " + yy);
+                        } else {
+                            System.out.println("xx yy: " + xx + " " + yy);
+                            int pixel = image.getRGB(xx, yy);
+                            int red = (pixel >> 16) & 0xff;
+                            int green = (pixel >> 8) & 0xff;
+                            int blue = (pixel) & 0xff;
+                            
+                            if (red == 63 && green == 72 & blue == 204) {
+                                landscapeArray[xx][yy] = new Sea(xx * SCALED_SIZE, yy * SCALED_SIZE, 1, ObjectId.Sea);
+                            }
+                            if (red == 34 && green == 177 & blue == 76) {
+                                landscapeArray[xx][yy] = new Oak(xx * SCALED_SIZE, yy * SCALED_SIZE, 0, ObjectId.Oak);
+                            }
+                            if (red == 255 && green == 242 & blue == 0) {
+                                landscapeArray[xx][yy] = new Plain(xx * SCALED_SIZE, yy * SCALED_SIZE, 2, ObjectId.Plain);
+                            }
+                            if (red == 181 && green == 230 & blue == 29) {
+                                landscapeArray[xx][yy] = new OpenForest(xx * SCALED_SIZE, yy * SCALED_SIZE, 3, ObjectId.OpenForest);
+                            } else if (red == 255 && green == 255 & blue == 255) {
+                                landscapeArray[xx][yy] = null;
+                            }
+                            
+                            landsLoaded++;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+            }
+        System.out.println(String.format("Hello"));
+        future.complete(null);
+        });
+        return null;
+        
     }
     
     public void addItAll(Handler handler) {
