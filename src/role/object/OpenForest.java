@@ -9,6 +9,7 @@ import Role.Texture;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import role.Role;
 import static role.Role.debugRole;
@@ -34,7 +35,7 @@ public class OpenForest extends GameObject implements LandscapeObject {
     
     Texture tex = Role.getInstance();
 
-    public void tick(LinkedList<GameObject> objects) {
+    public void tick(ArrayList<GameObject> objects) {
         if(debugRole) {
             index = objects.indexOf(this);
         }

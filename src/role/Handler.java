@@ -7,6 +7,7 @@ package role;
 
 import role.framework.GameObject;
 import java.awt.Graphics;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -17,7 +18,8 @@ import java.util.Set;
  */
 public class Handler {
     
-    public LinkedList<GameObject> objects = new LinkedList<>();
+    //public LinkedList<GameObject> objects = new LinkedList<>();
+    public ArrayList<GameObject> objects = new ArrayList<>();
     
     private GameObject tempObject;
     
@@ -30,6 +32,8 @@ public class Handler {
         }
     }
     
+    /** Denne metoden går igjennom alle objektene og gjengir dem grafisk.
+     * @param g */
     public void render(Graphics g) {
         for(int i = 0; i < objects.size(); i++) {
             tempObject = objects.get(i);

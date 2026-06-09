@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import role.Handler;
 import static role.Role.FPS;
@@ -35,7 +36,7 @@ public class Player extends GameObject{
     
 
     @Override
-    public void tick(LinkedList<GameObject> objects) {
+    public void tick(ArrayList<GameObject> objects) {
         x += velX;
         y += velY;
         
@@ -46,7 +47,7 @@ public class Player extends GameObject{
         }
     }
 
-    private void Collision(LinkedList<GameObject> object) {
+    private void Collision(ArrayList<GameObject> object) {
         for(int i = 0; i < handler.objects.size(); i++) {
             GameObject tempObject = handler.objects.get(i);
     
@@ -89,14 +90,17 @@ public class Player extends GameObject{
         }
         if(debugRole) {
             String debugNumber = String.format("index: %d", index);
+            
             g.setColor(Color.LIGHT_GRAY);
             
             g.drawString(debugNumber, (int)x, (int)y);
+            g.drawString(String.format("X: %f Y: %f", this.x, this.y), (int) x, (int) y - 15);
         }
         if(debugRole) {
             Font font = new Font("Courier New", Font.BOLD, 16);
             g.setFont(font);
-            g.drawString(String.format("FPS: %d frame: %d", FPS, frames), (int) (x - 5*SCALED_SIZE), (int) (y - 3*SCALED_SIZE));
+            g.drawString(String.format("FPS: %d frame: %d", FPS, frames), (int) (x - 5*SCALED_SIZE), (int) (y - 2*SCALED_SIZE));
+            
         }
     }
 

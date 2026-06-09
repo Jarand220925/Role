@@ -50,7 +50,7 @@ public class Role extends Canvas implements Runnable{
     public static boolean debugRole;
     public static int frames;
     public static int FPS;
-
+    
     public static boolean isDebugRole() {
         return debugRole;
     }
@@ -70,10 +70,11 @@ public class Role extends Canvas implements Runnable{
     Camera cam;
     /** Ser på posisjonen til spilleren via den euklidiske forskjellen. Hvis denne verdien er høyere enn loadingRange vil objektene bli lastet inn på nytt. */
     public static int loadingPos = 0;
-    /** Avstanden i euklidisk forstand før innlastning av objekter gjøres på nytt. */
-    public static int loadingRange = 5;
+    
     /** Hvor langt unna objekter vil bli lastet inn fra spillerens posisjon. */
     public static int chunk = 12;
+    /** Avstanden i euklidisk forstand før innlastning av objekter gjøres på nytt. */
+    public static int loadingRange = chunk/2;
     /** Denne variabelen blir brukt til å se på spillerens x posisjon forrige gang WorldLoaderen ble brukt.*/
     static float loadPosX;
     /** Denne variabelen blir brukt til å se på spillerens y posisjon forrige gang WorldLoaderen ble brukt.*/
@@ -123,10 +124,11 @@ public class Role extends Canvas implements Runnable{
         // Posisjonen til spilleren når WorldLoaderen blir kjørt.
         loadPosX = (int) explorer.getX()/SCALED_SIZE;
         loadPosY = (int) explorer.getY()/SCALED_SIZE;
-        worldLoaderFromList = new WorldLoaderFromList();
+        worldLoaderFromList = new WorldLoaderFromList(world);
         worldLoaderFromList.init();
         //worldLoaderFromList.loadImageLevel(world);
-        worldLoaderFromList.loadOnlyThousandFromImage(world);
+        //worldLoaderFromList.loadLimitedAmountFromImage(world);
+        worldLoaderFromList.loadLimitedAmountFromImageFuture(world);
         //worldLoaderFromList.loadFivehundredRandomLands(handler);
         //worldLoaderFromList.addItAll(handler);
         worldLoaderFromList.loadLandscape(handler);
@@ -147,13 +149,13 @@ public class Role extends Canvas implements Runnable{
         thread.start();
     }
     
-    /** Objektene har en funksjon i sin klasse som bestemmer når de blir tegnet. */
+    /** Objektene har en funksjon i sin klasse som bestemmer når de blir grafisk gjengitt. */
     private void renderContent(){
             BufferStrategy bs = this.getBufferStrategy();
         if(bs == null){
             this.createBufferStrategy(3);
             return;
-            }
+        }
         
         Graphics g = bs.getDrawGraphics();
         Graphics2D g2d = (Graphics2D) g;
@@ -224,36 +226,13 @@ public class Role extends Canvas implements Runnable{
                 cam.tick(handler.objects.get(i));
                 //worldLoader.checkForRearrange(world,handler);
                 worldLoaderFromList.checkForRearrange(handler);
-                
-                
+                  
             }
         }
-    }
-    /** Utfører utregning på hvor spilleren befinner seg på kartet,
-     * og legger ser om spilleren har beveget seg en gitt distanse fra det punktet.
-     * Hvis spilleren har beveget seg den gitte distansen, nevn ovenfor, vil landskap bli
-     * stokket om.
-     */
-    public void checkForRearrange() {
-        int py = (int) explorer.getY()/SCALED_SIZE;
-        int px = (int) explorer.getX()/SCALED_SIZE;
-        loadingPos = (int)Math.sqrt((double)((px-loadPosX)*(px-loadPosX)+(py-loadPosY)*(py-loadPosY)));
-        if (loadingRange < loadingPos) {
-            //worldLoader.removeTerrain(handler);
-            //worldLoader.loadImageAgain(world,handler);
-            worldLoaderFromList.removeTerrain(handler);
-            worldLoaderFromList.loadLandscape(handler);
-            loadPosX = (int) explorer.getX()/SCALED_SIZE;
-            loadPosY = (int) explorer.getY()/SCALED_SIZE;
-            euclideanCircle.rearrange();
-            loadingPos = 0;
-            //CompletableFuture.supplyAsync(() -> "Hello").thenApply(s -> s + " World!").thenAccept(System::out::println);
-        }
-//        if ( (px*px+py*py) < loadingpos - loadingrange || (int) (px*px+py*py) > loadingpos + loadingrange) {
-//                    removeTerrain();
-//                }
-    }   
-        
+    }  
+    
+    /** ???
+     * @return  */
     public static Texture getInstance() {
         return tex;
     }

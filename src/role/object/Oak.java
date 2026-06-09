@@ -11,6 +11,7 @@ import role.framework.GameObject;
 import role.framework.ObjectId;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import role.Role;
@@ -38,7 +39,7 @@ public class Oak extends GameObject implements LandscapeObject {
     Texture tex = Role.getInstance();
     
     @Override
-    public void tick(LinkedList<GameObject> objects) {
+    public void tick(ArrayList<GameObject> objects) {
         //Objektet slettes
 //        if(delnow == true) {
 //            objects.remove(this);
