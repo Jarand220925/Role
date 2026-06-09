@@ -99,7 +99,7 @@ public class Player extends GameObject{
         if(debugRole) {
             Font font = new Font("Courier New", Font.BOLD, 16);
             g.setFont(font);
-            g.drawString(String.format("FPS: %d frame: %d", FPS, frames), (int) (x - 5*SCALED_SIZE), (int) (y - 3*SCALED_SIZE));
+            g.drawString(String.format("FPS: %d frame: %d", FPS, frames), (int) (x - 5*SCALED_SIZE), (int) (y - 2*SCALED_SIZE));
             
         }
     }

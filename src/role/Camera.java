@@ -5,6 +5,7 @@
  */
 package role;
 
+import static role.Role.SCALED_SIZE;
 import role.framework.GameObject;
 
 
@@ -23,9 +24,8 @@ public class Camera {
     }
     
     public void tick(GameObject player) {
-        x = -player.getX() + Role.W/2 - 45;
-        y = -player.getY() + Role.H/2 - 45;
-        
+        x = -player.getX() + Role.W/2 - SCALED_SIZE/2;
+        y = -player.getY() + Role.H/2 - SCALED_SIZE/2;
     }
     
     public void setX(float x){

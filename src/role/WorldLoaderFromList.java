@@ -53,6 +53,9 @@ public class WorldLoaderFromList {
         this.w = image.getWidth();
     }
     //List<GameObject> wH;
+    /**
+     * Initialiserer objektbehandleren knyttet til dette objektet.
+     */
     public void init() {
         worldHandler = new Handler();
     }
@@ -109,7 +112,12 @@ public class WorldLoaderFromList {
         System.out.println("tiles looped: " + landsmade);
         //System.out.println("px: " +  px );
     }
-    
+    /**
+     * Laster inn landskap fra landskapslisten.
+     * Sjekker om landskap i landskapslisten til WorldLoaderen allerede er
+     * innlastet i objektbehandleren som tar i mot landskap.
+     * @param handler 
+     */
     public void loadLandscape(Handler handler) {
         // Spillerens posisjon ved forrige innlastning.
         int scaledLoadPosX = (int) loadPosX * SCALED_SIZE;
@@ -122,7 +130,7 @@ public class WorldLoaderFromList {
         
         int scaledChunk = chunk * SCALED_SIZE;
         
-        // Unøyaktig
+        // Unøyaktig, trodde jeg?
         int scaledCurrHighX = scaledPX + scaledChunk;
         int scaledCurrHighY = scaledPY + scaledChunk;
         int scaledCurrLowX = scaledPX - scaledChunk;
@@ -136,6 +144,7 @@ public class WorldLoaderFromList {
         int scaledBiggestLowX = Math.max(prevLowX, scaledCurrLowX);
         int scaledSmallestHighY = Math.min(prevHighY, scaledCurrHighY);
         int scaledBiggestLowY = Math.max(prevLowY, scaledCurrLowY);
+        
         int smallestHighX = Math.min(prevHighX/SCALED_SIZE, currHighX);
         int biggestLowX = Math.max(prevLowX/SCALED_SIZE, currLowX);
         int smallestHighY = Math.min(prevHighY/SCALED_SIZE, currHighY);
@@ -175,8 +184,12 @@ public class WorldLoaderFromList {
         prevLowY = scaledPY - scaledChunk;
         firstUse = false;
     }
-    
-    public void loadFivehundredRandomLands(Handler handler) {
+    /**
+     * Laster inn en gitt mengde med land fra tilfeldige koordinater.
+     * @param handler 
+     * @param amount 
+     */
+    public void loadFivehundredRandomLands(Handler handler, int amount) {
         
         int arraySizeX = landscapeArray.length;
         
@@ -336,15 +349,28 @@ public class WorldLoaderFromList {
                         }
                     }
                 }
-            } catch (Exception e) {
+            } catch (Throwable t) {
+        // Log the exception securely
+        System.err.println("Error in task: " + t.getMessage());
+                System.out.println(t);
+                System.err.println(t);
+                //System.exit(1);
             }
+
         System.out.println(String.format("Hello"));
         future.complete(null);
+        
         });
-        return null;
+        
+        return future;
         
     }
-    
+    /**
+     * Tar alle land fra WorldLoaderen sin liste og legger det inn
+     * i spillets objektbehandler.
+     * Ikke anbefalt metode for å laste inn landskap i objektbehandler.
+     * @param handler 
+     */
     public void addItAll(Handler handler) {
         
         int countIteration = 0;
@@ -366,6 +392,8 @@ public class WorldLoaderFromList {
         }
     }
     /** Ikke brukt
+     * Skal markere objekter for fjerning fra objektbehandler i spill og
+     * sletter dem også.
      * @param handler */
     public void removeTerrain(Handler handler) {
         
