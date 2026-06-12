@@ -72,9 +72,11 @@ public class Role extends Canvas implements Runnable{
     public static int loadingPos = 0;
     
     /** Hvor langt unna objekter vil bli lastet inn fra spillerens posisjon. */
-    public static int chunk = 12;
+    public static int tileLoadRange = 12;
     /** Avstanden i euklidisk forstand før innlastning av objekter gjøres på nytt. */
-    public static int loadingRange = chunk/2;
+    public static int loadingRange = tileLoadRange/2;
+    /** Hvor mange chunks som kan lastes inn i hver retning.*/
+    public static int chunkLoadRange = 3;
     /** Denne variabelen blir brukt til å se på spillerens x posisjon forrige gang WorldLoaderen ble brukt.*/
     static float loadPosX;
     /** Denne variabelen blir brukt til å se på spillerens y posisjon forrige gang WorldLoaderen ble brukt.*/
@@ -126,12 +128,17 @@ public class Role extends Canvas implements Runnable{
         loadPosY = (int) explorer.getY()/SCALED_SIZE;
         worldLoaderFromList = new WorldLoaderFromList(world);
         worldLoaderFromList.init();
+        //worldLoaderFromList.loadWorldFromImage(world, 3);
         //worldLoaderFromList.loadImageLevel(world);
         //worldLoaderFromList.loadLimitedAmountFromImage(world);
-        worldLoaderFromList.loadLimitedAmountFromImageFuture(world);
+        
+        //worldLoaderFromList.loadLimitedAmountFromImageFuture(world);
+        worldLoaderFromList.loadWorldFromImage(world, 4);
         //worldLoaderFromList.loadFivehundredRandomLands(handler);
         //worldLoaderFromList.addItAll(handler);
-        worldLoaderFromList.loadLandscape(handler);
+        
+        //worldLoaderFromList.loadLandscape(handler);
+        worldLoaderFromList.loadLandscapeChunks(handler);
         //worldLoader = new WorldLoader();
         //worldLoader.loadImageLevel(world, handler);
         //loadingpos = ((int)explorer.getX()*(int)explorer.getX() + (int)explorer.getY()*(int)explorer.getY())/96;

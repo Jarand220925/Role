@@ -7,7 +7,6 @@ package role;
 
 import java.awt.image.BufferedImage;
 import static role.Role.SCALED_SIZE;
-import static role.Role.chunk;
 import static role.Role.euclideanCircle;
 import static role.Role.explorer;
 import static role.Role.loadPosX;
@@ -18,6 +17,7 @@ import role.object.Oak;
 import role.object.Sea;
 import role.object.OpenForest;
 import role.object.Plain;
+import static role.Role.tileLoadRange;
 
 
 
@@ -43,7 +43,7 @@ public class WorldLoader {
         int w = image.getWidth();
         int h = image.getHeight();
         
-        //int chunk = this.chunk; //tvilsomt
+        //int tileLoadRange = this.tileLoadRange; //tvilsomt
         int py = (int)explorer.getY()/SCALED_SIZE;
         int px = (int)explorer.getX()/SCALED_SIZE;
 //        float newx = getX();
@@ -56,8 +56,8 @@ public class WorldLoader {
         
         //for(int yy = 0; yy < w; yy++) Brukes for å legge inn ruter basert på størrelsen av bilde.
         int landsmade = 0;
-        for(int xx = (int) px - chunk; xx <= px + chunk; xx++) {
-            for(int yy = (int) py - chunk; yy <= py + chunk; yy++) {
+        for(int xx = (int) px - tileLoadRange; xx <= px + tileLoadRange; xx++) {
+            for(int yy = (int) py - tileLoadRange; yy <= py + tileLoadRange; yy++) {
                 
                 if(xx < 0 || yy < 0 || xx > h || yy > w) {
                     //System.out.println("skipped: " + xx + " " + yy);
@@ -88,7 +88,7 @@ public class WorldLoader {
         int w = image.getWidth();
         int h = image.getHeight();
         
-        int chunk = Role.chunk;
+        int chunk = Role.tileLoadRange;
         int py = (int) explorer.getY()/SCALED_SIZE;
         int px = (int) explorer.getX()/SCALED_SIZE;
         float range = 500.0f;
@@ -145,7 +145,7 @@ public class WorldLoader {
     
     public void removeTerrain(Handler handler) {
         
-        //float chunk = this.chunk;
+        //float tileLoadRange = this.tileLoadRange;
         int py = (int) explorer.getY()/SCALED_SIZE;
         int px = (int) explorer.getX()/SCALED_SIZE;
         
@@ -161,7 +161,7 @@ public class WorldLoader {
             //System.out.println("ox: " + ox + " px: " + px);
             
             if(handler.objects.get(i).getId() != ObjectId.Player) {
-                if(ox < px - chunk || oy < py - chunk || ox > px + chunk || oy > py + chunk) {
+                if(ox < px - tileLoadRange || oy < py - tileLoadRange || ox > px + tileLoadRange || oy > py + tileLoadRange) {
                     GameObject objectForRemoval = handler.objects.get(i);
                     /* Kan være det er for tidlig å slette objektet, fordi det objektet som nå har akkurat samme plass i listen blir hoppet over,
                     selv om det er oppfyller kravene til å bli fjernet. */

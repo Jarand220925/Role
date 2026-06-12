@@ -8,6 +8,7 @@ package role;
 import role.framework.GameObject;
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -44,6 +45,10 @@ public class Handler {
     
     public void addObject(GameObject object) {
         this.objects.add(0, object);
+    }
+    
+    public void addObjectCollection(GameObject[] objects){
+        this.objects.addAll(0, Arrays.asList(objects));
     }
     
     public void removeObject(GameObject object) {

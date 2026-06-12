@@ -16,19 +16,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import static role.Role.SCALED_SIZE;
 import static role.Role.appIsRunning;
-import static role.Role.chunk;
+import static role.Role.chunkLoadRange;
 import static role.Role.euclideanCircle;
 import static role.Role.explorer;
 import static role.Role.loadPosX;
 import static role.Role.loadPosY;
 import static role.Role.loadingPos;
 import static role.Role.loadingRange;
+import role.framework.Chunk;
 import role.framework.GameObject;
 import role.framework.ObjectId;
 import role.object.Oak;
 import role.object.OpenForest;
 import role.object.Plain;
 import role.object.Sea;
+import static role.Role.tileLoadRange;
 
 /**
  * Denne versjonen har en egen objektbehandler(Handler) som bare tar inn landskap.
@@ -37,6 +39,9 @@ import role.object.Sea;
 public class WorldLoaderFromList {
     Handler worldHandler;
     GameObject[][] landscapeArray;
+    BufferedImage worldImage;
+    Chunk[][] chunkArray;
+    int worldChunkSize;
     
     private int h;
     private int w;
@@ -44,6 +49,7 @@ public class WorldLoaderFromList {
     private int prevLowY;
     private int prevHighX;
     private int prevHighY;
+    private Chunk prevChunk;
     public boolean firstUse = true;
     /** Bare hvor mange land i begge akser. */
     private int setAmountOfLands;
@@ -100,7 +106,8 @@ public class WorldLoaderFromList {
                 if(red == 34 && green == 177 & blue == 76) landscapeArray[xx][yy] = new Oak(xx*SCALED_SIZE, yy*SCALED_SIZE, 0, ObjectId.Oak);
                 if(red == 255 && green == 242 & blue == 0) {landscapeArray[xx][yy] = new Plain(xx*SCALED_SIZE, yy*SCALED_SIZE, 2, ObjectId.Plain);}
                 if(red == 181 && green == 230 & blue == 29) {landscapeArray[xx][yy] = new OpenForest(xx*SCALED_SIZE, yy*SCALED_SIZE, 3, ObjectId.OpenForest);}
-                else {landscapeArray[xx][yy] = null;}
+                //else if(red == 255 && green == 255 & blue == 255) {landscapeArray[xx][yy] = null;}
+                //else if(landscapeArray[xx][yy] == null) {landscapeArray[xx][yy] = null;}
                 
                 //if(px >= GameObject - range && px <=  + add && py >= newy - add && py <= newy + add )
                 //System.out.println("xx: " + xx);
@@ -111,6 +118,101 @@ public class WorldLoaderFromList {
         //System.out.println("objects-list size: " + handler.objects.size());
         System.out.println("tiles looped: " + landsmade);
         //System.out.println("px: " +  px );
+    }
+    
+    public void loadWorldFromImage(BufferedImage image, int chunkSize){
+        int w = image.getWidth();
+        int h = image.getHeight();
+        
+        int wm = w % chunkSize;
+        int hm = h % chunkSize;
+        if(wm != 0 || hm != 0){
+            System.err.print("Invalid chunk size");
+            System.exit(1);
+        }
+        
+        int amountOfChunksX = w/chunkSize;
+        int amountOfChunksY = h/chunkSize;
+        
+        worldChunkSize = chunkSize;
+        chunkArray = new Chunk[amountOfChunksX][amountOfChunksY];
+        
+        System.out.println("Loading chunks");
+        
+        int chunksMade = 0;
+        for(int xx = 0; xx < amountOfChunksX; xx++) {
+            for(int yy = 0; yy < amountOfChunksY; yy++) {
+                
+                if(xx < 0 || yy < 0 || xx > amountOfChunksX || yy > amountOfChunksY) {
+                    //System.out.println("skipped tile: " + xx + " " + yy);
+                } else {
+                //System.out.println("tile xx, yy: " + xx + " " + yy);
+                chunkArray[xx][yy] = new Chunk(worldChunkSize,xx,yy);
+                chunkArray[xx][yy].createChunk(image, w, h);
+                
+                //if(px >= GameObject - range && px <=  + add && py >= newy - add && py <= newy + add )
+                //System.out.println("xx: " + xx);
+                chunksMade++;
+                }
+            }
+        }
+        //System.out.println("objects-list size: " + handler.objects.size());
+        System.out.println("chunks made: " + chunksMade);
+    }
+    
+    public void loadLandscapeChunks(Handler handler){
+        
+        
+        
+        // Spillerens x og y posisjon.
+        int scaledPX = (int) explorer.getX();
+        int scaledPY = (int) explorer.getY();
+        int px = scaledPX/SCALED_SIZE;
+        int py = scaledPY/SCALED_SIZE;
+        
+        //Chunken spilleren er inne i.
+        int currChunkX = (int) Math.floor(px/worldChunkSize);
+        int currChunkY = (int) Math.floor(py/worldChunkSize);
+        
+        //Chunk currChunk = chunkArray[][];
+        
+        //De to chunkene som danner en firkant og begynnes med når innlastning starter.
+        int currHighCX = currChunkX + chunkLoadRange; 
+        int currHighCY = currChunkY + chunkLoadRange;
+        int currLowCX = currChunkX - chunkLoadRange;
+        int currLowCY = currChunkY - chunkLoadRange;
+        
+        for(int xx = currLowCX; xx <= currHighCX; xx++) {
+            
+            if(xx < 0 || xx >= chunkArray.length) {continue;}
+            
+            for(int yy = currLowCY; yy <= currHighCY; yy++) {
+                
+                if(yy < 0 || yy >= chunkArray[xx].length) {continue;}
+                
+                Chunk insertChunk;
+                   
+                //Hvis denne x og y posisjonen er innenfor felles innlastnings-område som den forrige.
+//                if((xx >= biggestLowX && xx <= smallestHighX && yy >= biggestLowY && yy <= smallestHighY) && !firstUse) {
+//                    continue;
+//                }
+                    
+                insertChunk = chunkArray[xx][yy];
+                insertChunk.insertToHandler(handler);
+                // Hvis objektet eksisterer.
+//                if(insertObj != null) {
+//                    if(insertObj.getX() <= scaledPX + scaledChunk && insertObj.getY() <= scaledPY + scaledChunk){
+//
+//                            handler.addObject(insertObj);
+//                    }
+//                }
+            }
+        }
+        
+        //Lagre chunken spilleren var i når innlastning av landskap ble gjort
+        //til bruk for neste gang innlastning skjer.
+        
+        
     }
     /**
      * Laster inn landskap fra landskapslisten.
@@ -128,17 +230,17 @@ public class WorldLoaderFromList {
         int px = scaledPX/SCALED_SIZE;
         int py = scaledPY/SCALED_SIZE;
         
-        int scaledChunk = chunk * SCALED_SIZE;
+        int scaledChunk = tileLoadRange * SCALED_SIZE;
         
         // Unøyaktig, trodde jeg?
         int scaledCurrHighX = scaledPX + scaledChunk;
         int scaledCurrHighY = scaledPY + scaledChunk;
         int scaledCurrLowX = scaledPX - scaledChunk;
         int scaledCurrLowY = scaledPY - scaledChunk;
-        int currHighX = px + chunk; 
-        int currHighY = py + chunk;
-        int currLowX = px - chunk;
-        int currLowY = py - chunk;
+        int currHighX = px + tileLoadRange; 
+        int currHighY = py + tileLoadRange;
+        int currLowX = px - tileLoadRange;
+        int currLowY = py - tileLoadRange;
         
         int scaledSmallestHighX = Math.min(prevHighX, scaledCurrHighX);
         int scaledBiggestLowX = Math.max(prevLowX, scaledCurrLowX);
@@ -397,7 +499,7 @@ public class WorldLoaderFromList {
      * @param handler */
     public void removeTerrain(Handler handler) {
         
-        //float chunk = this.chunk;
+        //float tileLoadRange = this.tileLoadRange;
         int py = (int) explorer.getY()/SCALED_SIZE;
         int px = (int) explorer.getX()/SCALED_SIZE;
         
@@ -414,9 +516,9 @@ public class WorldLoaderFromList {
             //System.out.println("ox: " + ox + " px: " + px);
             int handlerSize = handler.objects.size();
             
-            while(handler.objects.get(i).getId() != ObjectId.Player || handler.objects.size() < chunk*chunk || handlerSize >= objsIterated) {
+            while(handler.objects.get(i).getId() != ObjectId.Player || handler.objects.size() < tileLoadRange*tileLoadRange || handlerSize >= objsIterated) {
                 objsIterated++;
-                if(ox < px - chunk || oy < py - chunk || ox > px + chunk || oy > py + chunk) {
+                if(ox < px - tileLoadRange || oy < py - tileLoadRange || ox > px + tileLoadRange || oy > py + tileLoadRange) {
                     GameObject objectForRemoval = handler.objects.get(i);
 //                    System.out.println("index: " + handler.objects.indexOf(objectForRemoval));
                     /* Kan være det er for tidlig å slette objektet, fordi det objektet som nå har akkurat samme plass i listen blir hoppet over,
@@ -438,10 +540,10 @@ public class WorldLoaderFromList {
                 }
             } 
             if(handler.objects.get(i).getId() == ObjectId.Player) {System.out.println("this is a player" + "  " + "where i is: " + i);}
-            if(handler.objects.size() <= chunk*chunk) {System.out.println(String.format("Handler reached chunk*chunk size: ", chunk*chunk));}
+            if(handler.objects.size() <= tileLoadRange*tileLoadRange) {System.out.println(String.format("Handler reached tileLoadRange*tileLoadRange size: ", tileLoadRange*tileLoadRange));}
             //??
             countedObjs = handler.objects.size()-i;
-            System.out.println(String.format("hello %d", chunk*chunk));
+            System.out.println(String.format("hello %d", tileLoadRange*tileLoadRange));
         }
         
                 
@@ -491,7 +593,7 @@ public class WorldLoaderFromList {
             float ox = handler.objects.get(index).getX()/SCALED_SIZE;
             float oy = handler.objects.get(index).getY()/SCALED_SIZE;
             
-            if(ox < px - chunk || oy < py - chunk || ox > px + chunk || oy > py + chunk) {
+            if(ox < px - tileLoadRange || oy < py - tileLoadRange || ox > px + tileLoadRange || oy > py + tileLoadRange) {
                 GameObject objectForRemoval = handler.objects.get(index);
 //                    System.out.println("index: " + handler.objects.indexOf(objectForRemoval));
 //                objectForRemoval.setDelete(true);
@@ -534,5 +636,23 @@ public class WorldLoaderFromList {
             euclideanCircle.rearrange();
             loadingPos = 0;
         }
-    } 
+    }
+
+/** Ikke implementert
+ Skal sjekke når spilleren går over til en annen chunk.
+ * @param handler 
+ */    
+    public void checkForRearrangeChunks(Handler handler) {
+        int py = (int) explorer.getY()/SCALED_SIZE;
+        int px = (int) explorer.getX()/SCALED_SIZE;
+        loadingPos = (int)Math.sqrt((double)((px-loadPosX)*(px-loadPosX)+(py-loadPosY)*(py-loadPosY)));
+        if (loadingRange < loadingPos) {
+            removeTerrainWhile(handler);
+            loadLandscape(handler);
+            loadPosX = (int) explorer.getX()/SCALED_SIZE;
+            loadPosY = (int) explorer.getY()/SCALED_SIZE;
+            euclideanCircle.rearrange();
+            loadingPos = 0;
+        }
+    }
 }

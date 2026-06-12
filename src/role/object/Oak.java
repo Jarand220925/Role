@@ -86,7 +86,7 @@ public class Oak extends GameObject implements LandscapeObject {
     float oy = getY();
     float rangeX = 600.0f;
     float rangeY = 600.0f;
-    float chunk = (Role.chunk)*96;
+    float chunk = (Role.tileLoadRange)*Role.SCALED_SIZE;
     
     // Her sjekkes det om objektet skal rendres(tegnes? gjengis?).
     if(px >= ox - rangeX && px <= ox + rangeX && py >= oy - rangeY && py <= oy + rangeY){
@@ -96,10 +96,10 @@ public class Oak extends GameObject implements LandscapeObject {
         }
     // Denne skjekken gjør at objektet slettes av seg selv, når den er utenfor   
     if(px >= ox - chunk && px <= ox + chunk && py >= oy - chunk  && py <= oy + chunk) {
-         // +(chunk/2)
+         // +(tileLoadRange/2)
             } else { 
         delnow=true;
-        //System.out.println((chunk*2+newx));
+        //System.out.println((tileLoadRange*2+newx));
         }
     }
     
